@@ -1,0 +1,11 @@
+[project]
+name = "rtk-dash-sync"
+version = "0.1.0"
+description = "Sync RTK token savings data to the cloud dashboard"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.28",
+]
+
+[project.scripts]
+rtk-dash-sync = "rtk_dash_sync.__main__:main"

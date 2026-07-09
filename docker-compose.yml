@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rtk_dash
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@db:5432/rtk_dash"
+      JWT_SECRET: "change-me-in-production"
+      CORS_ORIGINS: "http://localhost:5173"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
