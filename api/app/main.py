@@ -52,9 +52,17 @@ app = FastAPI(title="RTK Dashboard API", version="0.1.0", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+def _resolve_origin(o: str) -> str:
+    o = o.strip()
+    if not o or o == "*":
+        return o
+    if o.startswith("http://") or o.startswith("https://"):
+        return o
+    return f"https://{o}"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[f"https://{o}" if o and not o.startswith("http") else o for o in settings.cors_origins.split(",")],
+    allow_origins=[_resolve_origin(o) for o in settings.cors_origins.split(",")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
