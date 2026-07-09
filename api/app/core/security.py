@@ -3,7 +3,8 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
-from jose import JWTError, jwt
+import jwt
+from jwt import PyJWTError
 
 from app.config import settings
 
@@ -26,7 +27,7 @@ def create_jwt(data: dict, expires_delta: timedelta | None = None) -> str:
 def decode_jwt(token: str) -> dict | None:
     try:
         return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
-    except JWTError:
+    except PyJWTError:
         return None
 
 
