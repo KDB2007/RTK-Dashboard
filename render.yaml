@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: rtk-dash-api
+    runtime: python
+    repo: https://github.com/KDB2007/RTK-Dashboard
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rtk-dash-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        fromService:
+          name: rtk-dash-frontend
+          type: static
+          property: url
+      - key: ADMIN_EMAIL
+        value: admin@rtk.ai
+      - key: ADMIN_PASSWORD
+        value: admin123
+
+  - type: web
+    name: rtk-dash-frontend
+    runtime: static
+    repo: https://github.com/KDB2007/RTK-Dashboard
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: rtk-dash-api
+          type: web
+          property: url
+
+databases:
+  - name: rtk-dash-db
+    databaseName: rtk_dash
+    user: rtk_dash
