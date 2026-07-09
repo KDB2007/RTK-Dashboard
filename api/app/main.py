@@ -33,15 +33,19 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
 
     async with async_session_factory() as session:
-        result = await session.execute(select(User).where(User.email == settings.admin_email))
-        if not result.scalar_one_or_none():
-            session.add(User(
-                email=settings.admin_email,
-                password_hash=hash_password(settings.admin_password),
-                name="Admin",
-                role="admin",
-            ))
-            await session.commit()
+        for email, password, name, role in [
+            (settings.admin_email, settings.admin_password, "Admin", "admin"),
+            ("demo@rtk.ai", "demo123", "Demo User", "user"),
+        ]:
+            existing = await session.execute(select(User).where(User.email == email))
+            if not existing.scalar_one_or_none():
+                session.add(User(
+                    email=email,
+                    password_hash=hash_password(password),
+                    name=name,
+                    role=role,
+                ))
+        await session.commit()
 
     yield
     await engine.dispose()
